@@ -65,7 +65,6 @@ export async function POST(req: Request) {
             model: "deepseek-chat",
             messages: formattedMessages as any,
             stream: true,
-            max_tokens: 2000,
         });
 
         const encoder = new TextEncoder();
