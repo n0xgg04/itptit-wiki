@@ -1,0 +1,142 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model bands {
+  id              BigInt            @id @default(autoincrement())
+  name            String            @db.VarChar
+  description     String?
+  logo_url        String?
+  created_at      DateTime          @default(now()) @db.Timestamptz(6)
+  members_in_band members_in_band[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model conversations {
+  id              String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  created_by_uuid String     @db.Uuid
+  created_at      DateTime   @default(now()) @db.Timestamptz(6)
+  users_auth      users_auth @relation(fields: [created_by_uuid], references: [uuid], onDelete: Cascade)
+  messages        messages[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model members {
+  id                      String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  fullname                String                    @db.VarChar
+  dob                     DateTime                  @db.Date
+  gender                  Int                       @default(0) @db.SmallInt
+  team                    BigInt
+  batch                   BigInt
+  student_code            String                    @db.VarChar
+  class_name              String                    @db.VarChar
+  email                   String                    @db.VarChar
+  facebook_link           String?                   @db.VarChar
+  main_pic                String                    @db.VarChar
+  phone_number            String?                   @db.VarChar
+  team_members_teamToteam team                      @relation("members_teamToteam", fields: [team], references: [id], onDelete: Cascade)
+  members_in_band         members_in_band[]
+  members_in_project_team members_in_project_team[]
+  positions_held          positions_held[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model members_in_band {
+  id        BigInt  @id @default(autoincrement())
+  member_id String  @db.Uuid
+  band_id   BigInt?
+  bands     bands?  @relation(fields: [band_id], references: [id])
+  members   members @relation(fields: [member_id], references: [id], onDelete: Cascade)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model members_in_project_team {
+  id              BigInt         @id @default(autoincrement())
+  member_id       String         @db.Uuid
+  project_team_id BigInt?
+  members         members        @relation(fields: [member_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  project_teams   project_teams? @relation(fields: [project_team_id], references: [id])
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model messages {
+  id              BigInt         @id @default(autoincrement())
+  conversation_id String         @db.Uuid
+  content         String?
+  created_at      DateTime       @default(now()) @db.Timestamptz(6)
+  created_by_uuid String         @db.Uuid
+  role            messages_role? @default(user)
+  conversations   conversations  @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
+  users_auth      users_auth     @relation(fields: [created_by_uuid], references: [uuid], onDelete: Cascade)
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model positions {
+  id             BigInt           @id @default(autoincrement())
+  name           String?          @db.VarChar
+  description    String?
+  positions_held positions_held[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model positions_held {
+  id          BigInt     @id @default(autoincrement())
+  member_id   String     @db.Uuid
+  from        DateTime   @db.Date
+  to          DateTime?  @db.Date
+  is_ended    Boolean?   @default(false)
+  position_id BigInt?
+  members     members    @relation(fields: [member_id], references: [id], onDelete: Cascade)
+  positions   positions? @relation(fields: [position_id], references: [id])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model project_teams {
+  id                      BigInt                    @id @default(autoincrement())
+  name                    String                    @db.VarChar
+  description             String?
+  logo_url                String?
+  created_at              DateTime                  @default(now()) @db.Timestamptz(6)
+  members_in_project_team members_in_project_team[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model prompt_inject {
+  id   BigInt @id @default(autoincrement())
+  data String
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model team {
+  id                         BigInt    @id @default(autoincrement())
+  name                       String    @db.VarChar
+  created_at                 DateTime  @default(now()) @db.Timestamptz(6)
+  members_members_teamToteam members[] @relation("members_teamToteam")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model users_auth {
+  uuid          String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email         String
+  created_at    DateTime?       @default(now()) @db.Timestamptz(6)
+  conversations conversations[]
+  messages      messages[]
+}
+
+enum messages_role {
+  system
+  user
+  model
+}
