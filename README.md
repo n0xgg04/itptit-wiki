@@ -1,7 +1,7 @@
 # ITPTIT Wiki
 
 - Sử dụng deepseek kèm prompt để generate thông tin
-...
+...x
 ### Create ``.env``
 ```aiignore
 NEXT_PUBLIC_SUPABASE_URL=
